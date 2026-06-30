@@ -1,0 +1,21 @@
+{
+  "name": "claudewright",
+  "version": "0.1.0",
+  "description": "Senior-engineer discipline for Claude Code — SOLID, DRY, separation of concerns, composition root, illegal-states-unrepresentable, plus a PreToolUse hook that blocks commits containing AI-attribution footers.",
+  "author": {
+    "name": "Aashish Thapa"
+  },
+  "homepage": "https://github.com/aashish-thapa/claudewright",
+  "repository": "https://github.com/aashish-thapa/claudewright",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "skill",
+    "hook",
+    "solid",
+    "code-discipline",
+    "code-quality",
+    "commit-policy"
+  ]
+}

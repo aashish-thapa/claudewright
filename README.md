@@ -16,11 +16,16 @@ A "wright" is a craftsperson: millwright, playwright, shipwright. **claudewright
 
 ## Install
 
+Inside Claude Code:
+
 ```
-/plugin install aashish-thapa/claudewright
+/plugin marketplace add aashish-thapa/claudewright
+/plugin install claudewright@claudewright
 ```
 
 That's it. The skill auto-loads on every coding task. The hook wires itself. No `settings.json` surgery required.
+
+To pick up future updates: `/plugin marketplace update claudewright`.
 
 ## What changes about your AI's code
 
@@ -150,8 +155,8 @@ claudewright is the opposite: one skill, one hook, and a single editorial point 
 git clone https://github.com/aashish-thapa/claudewright.git
 mkdir -p ~/.claude/skills ~/.claude/hooks
 
-cp -r claudewright/skills/claudewright ~/.claude/skills/
-cp claudewright/hooks/block-ai-attribution-commits.sh ~/.claude/hooks/
+cp -r claudewright/plugins/claudewright/skills/claudewright ~/.claude/skills/
+cp claudewright/plugins/claudewright/hooks/block-ai-attribution-commits.sh ~/.claude/hooks/
 chmod +x ~/.claude/hooks/block-ai-attribution-commits.sh
 ```
 

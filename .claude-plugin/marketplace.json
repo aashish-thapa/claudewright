@@ -1,0 +1,14 @@
+{
+  "name": "claudewright",
+  "owner": {
+    "name": "Aashish Thapa"
+  },
+  "plugins": [
+    {
+      "name": "claudewright",
+      "source": "./plugins/claudewright",
+      "description": "Senior-engineer discipline for Claude Code — SOLID, DRY, separation of concerns, plus a PreToolUse hook that blocks commits containing AI-attribution footers.",
+      "version": "0.1.0"
+    }
+  ]
+}

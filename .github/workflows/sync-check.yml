@@ -1,0 +1,37 @@
+name: sync-check
+
+on:
+  pull_request:
+    paths:
+      - 'skills/**/*.md'
+      - 'scripts/sync.sh'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - 'GEMINI.md'
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**/*.md'
+      - 'scripts/sync.sh'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - 'GEMINI.md'
+
+jobs:
+  verify-cross-tool-entries-in-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Regenerate cross-tool entry files from skills/
+        run: ./scripts/sync.sh
+
+      - name: Fail if AGENTS.md / CLAUDE.md / GEMINI.md drifted
+        run: |
+          if ! git diff --quiet -- AGENTS.md CLAUDE.md GEMINI.md; then
+            echo "::error::Cross-tool entry files are out of sync with skills/."
+            echo "::error::Run './scripts/sync.sh' locally, commit the result, and push."
+            git --no-pager diff -- AGENTS.md CLAUDE.md GEMINI.md
+            exit 1
+          fi
+          echo "AGENTS.md, CLAUDE.md, GEMINI.md are in sync with skills/."

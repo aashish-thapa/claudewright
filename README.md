@@ -1,16 +1,20 @@
 # claudewright
 
-> Senior-engineer discipline for AI coding. SOLID, DRY, separation of concerns — and a hook that keeps `Co-Authored-By: Claude` out of your git history.
+> Senior-engineer discipline for AI coding. SOLID, DRY, separation of concerns, a strict PR reviewer in your terminal — and a hook that keeps `Co-Authored-By: Claude` out of your git history.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-8A2BE2)](https://code.claude.com/docs/en/plugins)
-[![Skill + Hook](https://img.shields.io/badge/skill-+%20hook-2ea44f)](#whats-inside)
+[![2 skills + hook](https://img.shields.io/badge/2%20skills-%2B%20hook-2ea44f)](#whats-inside)
 
 ---
 
 Modern AI coding agents produce code that compiles, passes tests, and ships. A senior engineer reading the diff sees five principles violated, a switch statement that should be polymorphism, and `Co-Authored-By: Claude <noreply@anthropic.com>` polluting `git log`.
 
-**claudewright** is the opposite of "vibe coding." It's a single Claude Code plugin that teaches your agent 16 system design principles (SOLID, DRY, separation of concerns, composition root, illegal-states-unrepresentable, ...), a code-discipline rulebook for commits, comments, scope, and verification — and installs a hook that **denies any commit containing an AI-attribution footer before it touches your history**.
+**claudewright** is the opposite of "vibe coding." It's a single Claude Code plugin that ships:
+
+- A **discipline skill** that teaches Claude 16 system design principles (SOLID, DRY, separation of concerns, composition root, illegal-states-unrepresentable, ...) plus a code-discipline rulebook for commits, comments, scope, and verification.
+- A **senior-review skill** that channels the strict, abstraction-loving reviewer who used to send your PRs back four times — the one who reduced your 100-line function to a 10-line one and wrote the rewrite inline. Now you get him on demand.
+- A **commit hook** that denies any commit containing an AI-attribution footer before it touches your history.
 
 A "wright" is a craftsperson: millwright, playwright, shipwright. **claudewright** is what your Claude becomes when you install this.
 
@@ -67,9 +71,9 @@ Same shift happens in:
 
 ## What's inside
 
-claudewright ships three layers — installed together, decoupled in spirit:
+claudewright ships four layers — installed together, decoupled in spirit:
 
-### 1. The skill (`skills/claudewright/SKILL.md`)
+### 1. The discipline skill (`skills/claudewright/SKILL.md`)
 
 ~800 lines of opinionated principles. Auto-loads on every coding task. Each principle gets a definition, a *why*, concrete heuristics, a tiny anti-example, a corrected example, and cross-links to related principles.
 
@@ -105,7 +109,51 @@ claudewright ships three layers — installed together, decoupled in spirit:
 - **Read before writing** — read the file, run the test, check the version
 - **Risky actions require confirmation** — force-push, hard reset, dropping tables, sending external messages
 
-### 2. The hook (`hooks/block-ai-attribution-commits.sh`)
+### 2. The senior-review skill (`skills/review/SKILL.md`)
+
+Model-invoked when you ask for a code review, PR review, or "what would a senior engineer say about this." Channels a specific reviewer profile — strict, abstraction-loving, terse, allergic to reinvention.
+
+**What it does:**
+
+- Reads the full diff before commenting. Identifies the 1–3 *architectural* issues. Leads with those.
+- Writes the rewrite inline as a code block when a 100-line function should be 10 lines.
+- Names the stdlib helper or package the code is reinventing — `functools.partialmethod`, `anyio.create_memory_object_stream`, `pydantic_settings.BaseSettings`, `enum.StrEnum`, `__init_subclass__` registries, `pytest-freezegun`, `uvloop`.
+- Flags missing jitter/backoff anywhere there's a retry loop — *thundering herd*.
+- Calls out concrete dependencies in abstract classes, Protocols with private methods, ABCs that don't inherit `abc.ABC`.
+- Distinguishes throttle vs debounce vs rate-limit precisely. Names them correctly.
+- Delegates trivial nits to coderabbit and tests. Approves with caveats: `lgtm, fix coderabbit and tests`. Doesn't waste round trips.
+
+**Sample interaction:**
+
+> **You:** Review this PR for me — branch `feat/systemd-watcher`, 600 lines added.
+>
+> **claudewright:review:**
+>
+> Substantive issues:
+>
+> 1. `SystemdWatcher` is managing N units. Should manage one. Instantiate many at the call site.
+> 2. Health check pulls state from `SystemdWatcher` — invert it. The check should source its own state. Watcher stays generic.
+> 3. `_health_check_dispatcher` defined as a private method on `HealthCheckProtocol` — protocols define public contracts only.
+>
+> Inline:
+>
+> - `service.py:117` — `is_active()` + `is_running()` are 2 dbus round-trips per call. Short-lived cache.
+> - `service.py:165` — three methods (`start`, `stop`, `reload`) collapse to `functools.partialmethod` over one parameterized `transition_unit(action, name)`.
+> - `service.py:79` — strict on `*.service`. Not all units are. State this is intentional or accept the suffix.
+> - `bus.py:23` — shadowing builtin `id`.
+> - `checks/systemd.py:97` — multiple check instances, separate inflight events that don't cross. Failures not handled.
+>
+> CHANGES_REQUESTED. Address watcher single-responsibility first, then the dbus caching, then coderabbit.
+
+The skill includes a cross-reference table — when the review surfaces a violation, it names the principle from the discipline skill so the author can study it. `Concrete in field declaration → §DIP`. `Class doing four things → §SRP`. `Switch on type → §OCP`.
+
+**Invoke explicitly** when you want it without the model having to infer:
+
+```
+/claudewright:review
+```
+
+### 3. The hook (`hooks/block-ai-attribution-commits.sh`)
 
 A `PreToolUse` hook on `Bash` that silently passes through everything *except* `git commit` commands whose message contains:
 
@@ -125,7 +173,7 @@ echo '{"tool_name":"Bash","tool_input":{"command":"git commit -m \"feat: x\\n\\n
 
 The hook catches `git commit` inside compound commands too — `git add . && git commit -m "..."` is matched, not let through.
 
-### 3. Recommended companion settings
+### 4. Recommended companion settings
 
 The hook is *enforcement*. For *prevention*, also add these to `~/.claude/settings.json` so Claude Code's built-in commit/PR flow stops appending attribution footers in the first place:
 

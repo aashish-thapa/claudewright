@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://api.dicebear.com/9.x/pixel-art/svg?seed=claudewright&glasses=dark03&glassesProbability=100&backgroundColor=0f172a&radius=50&size=240" width="180" height="180" alt="claudewright mascot — a focused pixel-art developer with glasses" />
+  <img src="docs/avatar.png" width="180" height="180" alt="claudewright — illustrated developer at a laptop, framed as a circular avatar" />
 </p>
 
 <h1 align="center">claudewright</h1>

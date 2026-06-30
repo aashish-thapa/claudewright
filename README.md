@@ -1,20 +1,19 @@
 # claudewright
 
-> Senior-engineer discipline for AI coding. SOLID, DRY, separation of concerns, a strict PR reviewer in your terminal — and a hook that keeps `Co-Authored-By: Claude` out of your git history.
+> Senior-engineer discipline for AI coding. SOLID, DRY, separation of concerns, and a strict PR reviewer in your terminal.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-8A2BE2)](https://code.claude.com/docs/en/plugins)
-[![2 skills + hook](https://img.shields.io/badge/2%20skills-%2B%20hook-2ea44f)](#whats-inside)
+[![2 skills](https://img.shields.io/badge/skills-2-2ea44f)](#whats-inside)
 
 ---
 
-Modern AI coding agents produce code that compiles, passes tests, and ships. A senior engineer reading the diff sees five principles violated, a switch statement that should be polymorphism, and `Co-Authored-By: Claude <noreply@anthropic.com>` polluting `git log`.
+Modern AI coding agents produce code that compiles, passes tests, and ships. A senior engineer reading the diff sees five principles violated, a `switch` statement that should be polymorphism, and a class doing four things wearing one name.
 
-**claudewright** is the opposite of "vibe coding." It's a single Claude Code plugin that ships:
+**claudewright** is the opposite of "vibe coding." It's a single Claude Code plugin that ships two skills:
 
 - A **discipline skill** that teaches Claude 16 system design principles (SOLID, DRY, separation of concerns, composition root, illegal-states-unrepresentable, ...) plus a code-discipline rulebook for commits, comments, scope, and verification.
 - A **senior-review skill** that channels the strict, abstraction-loving reviewer who used to send your PRs back four times — the one who reduced your 100-line function to a 10-line one and wrote the rewrite inline. Now you get him on demand.
-- A **commit hook** that denies any commit containing an AI-attribution footer before it touches your history.
 
 A "wright" is a craftsperson: millwright, playwright, shipwright. **claudewright** is what your Claude becomes when you install this.
 
@@ -27,7 +26,7 @@ Inside Claude Code:
 /plugin install claudewright@claudewright
 ```
 
-That's it. The skill auto-loads on every coding task. The hook wires itself. No `settings.json` surgery required.
+That's it. Both skills auto-load. No `settings.json` surgery required.
 
 To pick up future updates: `/plugin marketplace update claudewright`.
 
@@ -67,11 +66,11 @@ Same shift happens in:
 | `_gst_audio.py`, `_pil_color.py`, `_image_ops.py` piled in `pipeline/` | Domain-grouped packages: `gst/`, `image/`, `video/` |
 | `account.balance = -50_000` mutable from outside | Encapsulated `withdraw()` that enforces the invariant |
 | `if order is None or not hasattr(order, "items") or ...` | Validate once at the boundary, then trust the type inside |
-| Five commits referencing PR #123, "per review feedback", `Co-Authored-By: Claude` | `fix(user): reject empty email at registration boundary` |
+| Five commits referencing PR #123, "per review feedback", "addressed comments" | `fix(user): reject empty email at registration boundary` |
 
 ## What's inside
 
-claudewright ships four layers — installed together, decoupled in spirit:
+Two skills, both auto-loaded by the plugin:
 
 ### 1. The discipline skill (`skills/claudewright/SKILL.md`)
 
@@ -153,41 +152,22 @@ The skill includes a cross-reference table — when the review surfaces a violat
 /claudewright:review
 ```
 
-### 3. The hook (`hooks/block-ai-attribution-commits.sh`)
+## Bonus: `Co-Authored-By: Claude` is not a thing
 
-A `PreToolUse` hook on `Bash` that silently passes through everything *except* `git commit` commands whose message contains:
+You wrote the prompt. You reviewed the diff. You're the one who'll be on call when it breaks at 2am. Claude isn't your co-author and your `git log` doesn't need a sponsor.
 
-- `Co-Authored-By: Claude`
-- `Generated with [...] Claude Code`
-- `🤖 Generated with`
+Quietly bundled with the plugin: a `PreToolUse` hook on `Bash` that denies any `git commit` whose message contains `Co-Authored-By: Claude`, `Generated with Claude Code`, or `🤖 Generated with`. Caught before the commit runs, including inside compound commands like `git add . && git commit -m "..."`. Claude gets the rejection reason back and retries with a clean message. You never see the footer.
 
-When matched, the Bash call is denied **before it runs** and Claude receives the rejection reason verbatim. It retries with a clean message on the next turn. Your `git log` stays clean — by your own rule, not Anthropic's default.
-
-Test it standalone:
-
-```bash
-echo '{"tool_name":"Bash","tool_input":{"command":"git commit -m \"feat: x\\n\\nCo-Authored-By: Claude\""}}' \
-  | hooks/block-ai-attribution-commits.sh
-# → {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny", ...}}
-```
-
-The hook catches `git commit` inside compound commands too — `git add . && git commit -m "..."` is matched, not let through.
-
-### 4. Recommended companion settings
-
-The hook is *enforcement*. For *prevention*, also add these to `~/.claude/settings.json` so Claude Code's built-in commit/PR flow stops appending attribution footers in the first place:
+For belt-and-suspenders prevention, drop these into `~/.claude/settings.json` so Claude Code's built-in commit/PR flow stops adding the footer in the first place:
 
 ```json
 {
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
+  "attribution": { "commit": "", "pr": "" },
   "includeCoAuthoredBy": false
 }
 ```
 
-Belt and suspenders: the built-in flow won't add the footer, and the hook denies any manual attempt to add one.
+Settings stop it at the source. The hook is the fallback if any future feature tries to add it back.
 
 ## Why this and not one of the 425 other Claude plugins
 
@@ -195,7 +175,7 @@ claudewright is **a stance, not a library**.
 
 The trending Claude Code repos in 2026 are curated collections — 1000+ skills, 425 plugins, 135 agents bundled into "ultimate toolkits". They're encyclopedias. You install them to *have options*.
 
-claudewright is the opposite: one skill, one hook, and a single editorial point of view about what good code looks like. If you disagree with the take — composition over inheritance, Protocol-first DI, no AI-attribution footers, no defensive null-checks inside the system — you won't enjoy it. If you agree, installing it is faster than convincing Claude of any one of these principles from scratch in every new session.
+claudewright is the opposite: two skills with a single editorial point of view about what good code looks like. If you disagree with the take — composition over inheritance, Protocol-first DI, async-context-managers over `set_x()` + `set_y()`, no defensive null-checks inside the system — you won't enjoy it. If you agree, installing it is faster than convincing Claude of any one of these principles from scratch in every new session.
 
 ## Manual install (no plugin system)
 
@@ -204,6 +184,7 @@ git clone https://github.com/aashish-thapa/claudewright.git
 mkdir -p ~/.claude/skills ~/.claude/hooks
 
 cp -r claudewright/plugins/claudewright/skills/claudewright ~/.claude/skills/
+cp -r claudewright/plugins/claudewright/skills/review ~/.claude/skills/
 cp claudewright/plugins/claudewright/hooks/block-ai-attribution-commits.sh ~/.claude/hooks/
 chmod +x ~/.claude/hooks/block-ai-attribution-commits.sh
 ```

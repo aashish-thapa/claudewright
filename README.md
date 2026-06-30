@@ -1,46 +1,51 @@
 <p align="center">
-  <img src="docs/avatar.png" width="180" height="180" alt="claudewright — illustrated developer at a laptop, framed as a circular avatar" />
+  <img src="docs/avatar.png" width="180" height="180" alt="craftwright — illustrated developer at a laptop, framed as a circular avatar" />
 </p>
 
-<h1 align="center">claudewright</h1>
+<h1 align="center">craftwright</h1>
 
 <p align="center">
-  <em>Senior-engineer discipline for AI coding. SOLID, DRY, separation of concerns, and a strict PR reviewer in your terminal.</em>
+  <em>Senior-engineer discipline for any AI coding agent. SOLID, DRY, separation of concerns, and a strict on-demand PR reviewer.</em>
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
-  <a href="https://code.claude.com/docs/en/plugins"><img src="https://img.shields.io/badge/Claude%20Code-Plugin-8A2BE2" alt="Claude Code Plugin" /></a>
-  <a href="#whats-inside"><img src="https://img.shields.io/badge/skills-2-2ea44f" alt="2 skills" /></a>
+  <a href="https://agents.md"><img src="https://img.shields.io/badge/AGENTS.md-compatible-0ea5e9" alt="AGENTS.md compatible" /></a>
+  <a href="#install"><img src="https://img.shields.io/badge/skills-2-2ea44f" alt="2 skills" /></a>
+  <a href="#install"><img src="https://img.shields.io/badge/tool--agnostic-yes-8A2BE2" alt="Tool-agnostic" /></a>
 </p>
 
 ---
 
 Modern AI coding agents produce code that compiles, passes tests, and ships. A senior engineer reading the diff sees five principles violated, a `switch` statement that should be polymorphism, and a class doing four things wearing one name.
 
-**claudewright** is the opposite of "vibe coding." It's a single Claude Code plugin that ships two skills:
+**craftwright** is the opposite of "vibe coding." Two skills shipped as plain markdown that any AI coding agent can read:
 
-- A **discipline skill** that teaches Claude 16 system design principles (SOLID, DRY, separation of concerns, composition root, illegal-states-unrepresentable, ...) plus a code-discipline rulebook for commits, comments, scope, and verification.
+- A **discipline skill** that teaches your agent 16 system design principles (SOLID, DRY, separation of concerns, composition root, illegal-states-unrepresentable, ...) plus a code-discipline rulebook for commits, comments, scope, and verification.
 - A **senior-review skill** that channels the strict, abstraction-loving reviewer who used to send your PRs back four times — the one who reduced your 100-line function to a 10-line one and wrote the rewrite inline. Now you get him on demand.
 
-A "wright" is a craftsperson: millwright, playwright, shipwright. **claudewright** is what your Claude becomes when you install this.
+A "wright" is a craftsperson: millwright, playwright, shipwright. **craftwright** is what your AI becomes when you install this.
 
 ## Install
 
-Inside Claude Code:
+One source of truth, every tool.
 
-```
-/plugin marketplace add aashish-thapa/claudewright
-/plugin install claudewright@claudewright
-```
+| Your AI tool | Install | Notes |
+|---|---|---|
+| **Claude Code** | `/plugin marketplace add aashish-thapa/craftwright`<br>`/plugin install craftwright@craftwright` | Full: 2 skills + commit hook |
+| **OpenAI Codex CLI** | `curl -sL https://raw.githubusercontent.com/aashish-thapa/craftwright/main/AGENTS.md >> AGENTS.md` | [details](adapters/codex-cli.md) |
+| **Cursor** | `curl -sL .../AGENTS.md > AGENTS.md` | [details](adapters/cursor.md) — reads AGENTS.md natively |
+| **Aider** | `curl -sL .../AGENTS.md > CONVENTIONS.md` | [details](adapters/aider.md) |
+| **GitHub Copilot** | `curl -sL .../AGENTS.md > .github/copilot-instructions.md` | [details](adapters/copilot.md) |
+| **Google Antigravity** | `curl -sL .../AGENTS.md > .agents/rules/craftwright.md` | [details](adapters/antigravity.md) |
+| **Anything reading `AGENTS.md`** (Windsurf, Devin, Zed, JetBrains Junie, Amp, ...) | `curl -sL .../AGENTS.md >> AGENTS.md` | 28+ tools support the standard |
+| **Gemini CLI** | `curl -sL https://raw.githubusercontent.com/aashish-thapa/craftwright/main/GEMINI.md > GEMINI.md` | Gemini's native file |
 
-That's it. Both skills auto-load. No `settings.json` surgery required.
-
-To pick up future updates: `/plugin marketplace update claudewright`.
+The full markdown content is mirrored to `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` at the repo root — pick whichever filename your tool prefers.
 
 ## What changes about your AI's code
 
-**Before** — Claude writes the obvious thing:
+**Before** — your agent writes the obvious thing:
 
 ```python
 def area(shape):
@@ -49,7 +54,7 @@ def area(shape):
     elif shape.kind == "tri":    return 0.5 * shape.base * shape.height
 ```
 
-**After** — Claude reaches for the seam first:
+**After** — your agent reaches for the seam first:
 
 ```python
 class Shape(Protocol):
@@ -64,11 +69,11 @@ class Square:
     def area(self): return self.side ** 2
 ```
 
-Same behavior. The first edits its own dispatching switch every time a shape is added; the second satisfies §Open/Closed and never touches existing code again. claudewright teaches the difference — and tells Claude *which principle* applies — in language the model actually internalizes.
+Same behavior. The first edits its own dispatching switch every time a shape is added; the second satisfies §Open/Closed and never touches existing code again. craftwright teaches the difference — and tells your agent *which principle* applies — in language any LLM-driven tool internalizes.
 
 Same shift happens in:
 
-| Anti-pattern | claudewright pushes toward |
+| Anti-pattern | craftwright pushes toward |
 |---|---|
 | `OrderService` calling `PostgresClient(host=...)` directly | A `Protocol` for the store, concrete wired in a composition root |
 | `_gst_audio.py`, `_pil_color.py`, `_image_ops.py` piled in `pipeline/` | Domain-grouped packages: `gst/`, `image/`, `video/` |
@@ -78,11 +83,9 @@ Same shift happens in:
 
 ## What's inside
 
-Two skills, both auto-loaded by the plugin:
+### 1. The discipline skill (`skills/discipline/SKILL.md`)
 
-### 1. The discipline skill (`skills/claudewright/SKILL.md`)
-
-~800 lines of opinionated principles. Auto-loads on every coding task. Each principle gets a definition, a *why*, concrete heuristics, a tiny anti-example, a corrected example, and cross-links to related principles.
+~800 lines of opinionated principles. Each principle gets a definition, a *why*, concrete heuristics, a tiny anti-example, a corrected example, and cross-links to related principles.
 
 **Part I — 16 system design principles:**
 
@@ -134,7 +137,7 @@ Model-invoked when you ask for a code review, PR review, or "what would a senior
 
 > **You:** Review this PR for me — branch `feat/systemd-watcher`, 600 lines added.
 >
-> **claudewright:review:**
+> **craftwright:review:**
 >
 > Substantive issues:
 >
@@ -154,19 +157,21 @@ Model-invoked when you ask for a code review, PR review, or "what would a senior
 
 The skill includes a cross-reference table — when the review surfaces a violation, it names the principle from the discipline skill so the author can study it. `Concrete in field declaration → §DIP`. `Class doing four things → §SRP`. `Switch on type → §OCP`.
 
-**Invoke explicitly** when you want it without the model having to infer:
+**Invoke explicitly** (Claude Code) when you want it without the model having to infer:
 
 ```
-/claudewright:review
+/craftwright:review
 ```
+
+For other tools: just ask "review this PR" or "review these changes" — the skill's description triggers the agent to load it.
 
 ## Bonus: `Co-Authored-By: Claude` is not a thing
 
-You wrote the prompt. You reviewed the diff. You're the one who'll be on call when it breaks at 2am. Claude isn't your co-author and your `git log` doesn't need a sponsor.
+You wrote the prompt. You reviewed the diff. You're the one who'll be on call when it breaks at 2am. Your AI assistant isn't your co-author and your `git log` doesn't need a sponsor.
 
-Quietly bundled with the plugin: a `PreToolUse` hook on `Bash` that denies any `git commit` whose message contains `Co-Authored-By: Claude`, `Generated with Claude Code`, or `🤖 Generated with`. Caught before the commit runs, including inside compound commands like `git add . && git commit -m "..."`. Claude gets the rejection reason back and retries with a clean message. You never see the footer.
+Quietly bundled with the **Claude Code plugin**: a `PreToolUse` hook on `Bash` that denies any `git commit` whose message contains `Co-Authored-By: Claude`, `Generated with Claude Code`, or `🤖 Generated with`. Caught before the commit runs, including inside compound commands like `git add . && git commit -m "..."`. Your AI gets the rejection reason back and retries with a clean message. You never see the footer.
 
-For belt-and-suspenders prevention, drop these into `~/.claude/settings.json` so Claude Code's built-in commit/PR flow stops adding the footer in the first place:
+For belt-and-suspenders prevention in Claude Code, also drop these into `~/.claude/settings.json`:
 
 ```json
 {
@@ -175,56 +180,52 @@ For belt-and-suspenders prevention, drop these into `~/.claude/settings.json` so
 }
 ```
 
-Settings stop it at the source. The hook is the fallback if any future feature tries to add it back.
+For other tools, the equivalent is a git `pre-commit` hook — copy `hooks/block-ai-attribution-commits.sh` and adapt the input parsing (it currently reads Claude Code's stdin JSON format).
 
-## Why this and not one of the 425 other Claude plugins
+## Why this and not one of the 425 other Claude / Codex / Cursor plugins
 
-claudewright is **a stance, not a library**.
+craftwright is **a stance, not a library**.
 
-The trending Claude Code repos in 2026 are curated collections — 1000+ skills, 425 plugins, 135 agents bundled into "ultimate toolkits". They're encyclopedias. You install them to *have options*.
+The trending AI-coding repos in 2026 are curated collections — 1000+ skills, 425 plugins, 135 agents bundled into "ultimate toolkits." They're encyclopedias. You install them to *have options*.
 
-claudewright is the opposite: two skills with a single editorial point of view about what good code looks like. If you disagree with the take — composition over inheritance, Protocol-first DI, async-context-managers over `set_x()` + `set_y()`, no defensive null-checks inside the system — you won't enjoy it. If you agree, installing it is faster than convincing Claude of any one of these principles from scratch in every new session.
+craftwright is the opposite: two skills with a single editorial point of view about what good code looks like. If you disagree with the take — composition over inheritance, Protocol-first DI, async-context-managers over `set_x()` + `set_y()`, no defensive null-checks inside the system — you won't enjoy it. If you agree, installing it is faster than convincing your AI of any one of these principles from scratch in every new session.
 
-## Manual install (no plugin system)
+## Repository layout
 
-```bash
-git clone https://github.com/aashish-thapa/claudewright.git
-mkdir -p ~/.claude/skills ~/.claude/hooks
-
-cp -r claudewright/plugins/claudewright/skills/claudewright ~/.claude/skills/
-cp -r claudewright/plugins/claudewright/skills/review ~/.claude/skills/
-cp claudewright/plugins/claudewright/hooks/block-ai-attribution-commits.sh ~/.claude/hooks/
-chmod +x ~/.claude/hooks/block-ai-attribution-commits.sh
 ```
-
-Then add to `~/.claude/settings.json`:
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/block-ai-attribution-commits.sh"
-          }
-        ]
-      }
-    ]
-  }
-}
+craftwright/
+├── skills/                          ← single source of truth (Claude Code SKILL.md files)
+│   ├── discipline/SKILL.md
+│   └── review/SKILL.md
+├── hooks/                           ← Claude Code PreToolUse hook
+│   ├── hooks.json
+│   └── block-ai-attribution-commits.sh
+├── AGENTS.md                        ← generated cross-tool entry (Codex, Cursor, Aider, ...)
+├── CLAUDE.md                        ← copy for Claude Code's native entry
+├── GEMINI.md                        ← copy for Gemini CLI's native entry
+├── .claude-plugin/                  ← Claude Code plugin + marketplace manifests
+│   ├── plugin.json
+│   └── marketplace.json
+├── adapters/                        ← per-tool install guides
+│   ├── codex-cli.md
+│   ├── cursor.md
+│   ├── aider.md
+│   ├── copilot.md
+│   └── antigravity.md
+├── scripts/sync.sh                  ← regenerates AGENTS.md / CLAUDE.md / GEMINI.md from skills/
+└── docs/avatar.png
 ```
 
 ## Contributing
 
-PRs and issues welcome. The skill stays **tight and scannable** — additions should:
+PRs and issues welcome. The skills stay **tight and scannable** — additions should:
 
 - Be language-agnostic (Python or pseudo-code that reads to TS, Go, Rust readers).
 - Include a concrete anti-example AND a corrected version (5–15 lines each).
 - Cross-link related principles inline (`see also: §...`).
 - Avoid project-specific references, framework lock-in, and meta-skill content.
+
+**When editing skills**, run `./scripts/sync.sh` to regenerate the cross-tool entry files (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`).
 
 If proposing a new principle, check whether it's already covered under a different name — there's real overlap between Single Responsibility, Separation of Concerns, and Cohesion/Coupling, and the skill resolves the overlap through cross-links rather than restating the same idea three times.
 

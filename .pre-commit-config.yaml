@@ -1,0 +1,13 @@
+# Run `pre-commit install` once to enable. After that, `AGENTS.md`, `CLAUDE.md`,
+# and `GEMINI.md` are regenerated from `skills/*/SKILL.md` on every commit that
+# touches those files — they can't drift out of sync.
+repos:
+  - repo: local
+    hooks:
+      - id: sync-cross-tool-entries
+        name: Regenerate AGENTS.md / CLAUDE.md / GEMINI.md from skills/
+        entry: scripts/sync.sh
+        language: system
+        files: ^(skills/.*\.md|scripts/sync\.sh)$
+        pass_filenames: false
+        always_run: false

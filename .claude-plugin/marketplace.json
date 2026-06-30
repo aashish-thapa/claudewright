@@ -1,14 +1,18 @@
 {
-  "name": "claudewright",
+  "name": "craftwright",
+  "description": "Senior-engineer discipline for AI coding agents. Single-plugin marketplace for craftwright.",
   "owner": {
     "name": "Aashish Thapa"
   },
   "plugins": [
     {
-      "name": "claudewright",
-      "source": "./plugins/claudewright",
-      "description": "Senior-engineer discipline for Claude Code — SOLID, DRY, separation of concerns, plus a PreToolUse hook that blocks commits containing AI-attribution footers.",
-      "version": "0.1.0"
+      "name": "craftwright",
+      "description": "Senior-engineer discipline for AI coding agents — SOLID, DRY, separation of concerns, plus a strict on-demand PR reviewer.",
+      "version": "0.2.0",
+      "source": "./",
+      "author": {
+        "name": "Aashish Thapa"
+      }
     }
   ]
 }

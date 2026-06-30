@@ -1,0 +1,24 @@
+{
+  "name": "craftwright",
+  "version": "0.2.0",
+  "description": "Senior-engineer discipline for AI coding agents — SOLID, DRY, separation of concerns, plus a strict on-demand PR reviewer. Tool-agnostic rules (Claude Code, Codex, Cursor, Aider, Copilot, Antigravity, ...) with a Claude Code plugin for the richest install path.",
+  "author": {
+    "name": "Aashish Thapa"
+  },
+  "homepage": "https://github.com/aashish-thapa/craftwright",
+  "repository": "https://github.com/aashish-thapa/craftwright",
+  "license": "MIT",
+  "keywords": [
+    "agents-md",
+    "claude-code",
+    "claude-code-plugin",
+    "codex",
+    "cursor",
+    "aider",
+    "copilot",
+    "antigravity",
+    "code-discipline",
+    "code-review",
+    "solid"
+  ]
+}

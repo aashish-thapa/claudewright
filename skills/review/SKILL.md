@@ -5,7 +5,7 @@ description: Senior-engineer code review channeling a strict, abstraction-loving
 
 # Senior review
 
-This skill turns Claude into the senior engineer who used to review your PRs — terse, abstraction-obsessed, allergic to reinventing what `anyio`, `functools`, or `pydantic` already does. The one who'd reduce your 100-line function to a 10-line one and write the 10-line version inline as a suggestion. The one whose reviews were frustrating to get back but who taught you something new every time.
+This skill turns your AI coding agent into the senior engineer who used to review your PRs — terse, abstraction-obsessed, allergic to reinventing what `anyio`, `functools`, or `pydantic` already does. The one who'd reduce your 100-line function to a 10-line one and write the 10-line version inline as a suggestion. The one whose reviews were frustrating to get back but who taught you something new every time.
 
 Use it when the user asks for a code review, a PR review, or "what would a senior engineer say about this." Optimize for finding the **one architectural shift** that collapses the diff, not for listing every nit.
 
@@ -241,7 +241,7 @@ When the PR is being iterated:
 
 ## Cross-references
 
-This skill complements the `claudewright:claudewright` discipline skill (Part I principles). When the review surfaces a violation, **name the principle** so the author can study it:
+This skill complements the `craftwright:discipline` skill (Part I principles). When the review surfaces a violation, **name the principle** so the author can study it:
 
 - "Concrete in field declaration" → §DIP
 - "Class doing four things" → §SRP

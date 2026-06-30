@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# claudewright: PreToolUse hook for Bash that denies `git commit` invocations
+# craftwright: PreToolUse hook for Bash that denies `git commit` invocations
 # whose message contains an AI-attribution footer.
 set -euo pipefail
 
@@ -12,7 +12,7 @@ fi
 
 if printf '%s' "$cmd" | grep -qiE 'co-authored-by:[[:space:]]*claude|generated with .{0,4}claude code|🤖 generated with'; then
   cat <<'JSON'
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Commit message contains an AI-attribution footer (Co-Authored-By: Claude or Generated with Claude Code). Strip the footer and retry the commit. This rule is enforced by the claudewright plugin."}}
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Commit message contains an AI-attribution footer (Co-Authored-By: Claude or Generated with Claude Code). Strip the footer and retry the commit. This rule is enforced by the craftwright plugin."}}
 JSON
 fi
 

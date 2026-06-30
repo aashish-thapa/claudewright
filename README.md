@@ -1,10 +1,18 @@
-# claudewright
+<p align="center">
+  <img src="https://api.dicebear.com/9.x/pixel-art/svg?seed=claudewright&glasses=variant03&glassesProbability=100&backgroundColor=0f172a&radius=50&size=240" width="180" height="180" alt="claudewright mascot — a focused pixel-art developer with glasses" />
+</p>
 
-> Senior-engineer discipline for AI coding. SOLID, DRY, separation of concerns, and a strict PR reviewer in your terminal.
+<h1 align="center">claudewright</h1>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-8A2BE2)](https://code.claude.com/docs/en/plugins)
-[![2 skills](https://img.shields.io/badge/skills-2-2ea44f)](#whats-inside)
+<p align="center">
+  <em>Senior-engineer discipline for AI coding. SOLID, DRY, separation of concerns, and a strict PR reviewer in your terminal.</em>
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
+  <a href="https://code.claude.com/docs/en/plugins"><img src="https://img.shields.io/badge/Claude%20Code-Plugin-8A2BE2" alt="Claude Code Plugin" /></a>
+  <a href="#whats-inside"><img src="https://img.shields.io/badge/skills-2-2ea44f" alt="2 skills" /></a>
+</p>
 
 ---
 

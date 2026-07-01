@@ -706,6 +706,134 @@ def filter_orders(orders: list[Order], predicate: Predicate[Order]) -> list[Orde
 
 ---
 
+### Never in production code
+
+The following patterns look harmless in a script or a test, and are actively dangerous in production. AI coding agents ship them constantly. Reject them on sight.
+
+**`assert` for runtime validation**
+
+- Python's `-O` flag strips every `assert` statement. Anything you "validated" via `assert` is unchecked in production.
+- `assert` belongs in tests and in debug-build-only sanity checks. It is *not* a validation primitive.
+- For real runtime validation, raise the specific exception:
+
+  ```python
+  # WRONG — vanishes under python -O
+  def transfer(amount: Decimal, account: Account) -> None:
+      assert amount > 0, "amount must be positive"
+
+  # RIGHT — checked in every build
+  def transfer(amount: Decimal, account: Account) -> None:
+      if amount <= 0:
+          raise ValueError("amount must be positive")
+  ```
+
+**Debugging leftovers**
+
+- `print(...)` / `console.log(...)` as logging. Structured logger only (`logging`, `structlog`, `logfire`, `pino`, `tracing`).
+- `breakpoint()`, `pdb.set_trace()`, `debugger;`, `binding.pry` — remove before commit.
+- Commented-out code. Delete it. `git log` remembers.
+
+**Broad exception catching**
+
+- `except:` catches `SystemExit`, `KeyboardInterrupt`, `GeneratorExit`. The runtime can no longer shut down cleanly.
+- `except Exception: pass` silently swallows bugs. Failures become invisible.
+- Correct pattern: catch the specific exception you can handle; re-raise the rest preserving cause:
+
+  ```python
+  try:
+      order = repo.get(order_id)
+  except OrderNotFound:
+      return None
+  except Exception as e:
+      logger.exception("unexpected error loading order", order_id=order_id)
+      raise
+  ```
+
+**Hardcoded secrets / config**
+
+- API keys, tokens, connection strings, JWT secrets in source. Ever. Not even "temporarily."
+- Read from a settings model (`pydantic_settings.BaseSettings`, `envalid`, `viper`), with values sourced from environment or a secrets manager.
+- Magic numbers that look behavioral (timeouts, retry counts, batch sizes, feature thresholds): named constants at minimum, `Settings` model if per-environment tuning is plausible.
+
+**Blocking I/O inside async code**
+
+- `time.sleep(x)` inside `async def` → `await asyncio.sleep(x)` or `await anyio.sleep(x)`. `time.sleep` freezes the entire event loop for every other coroutine.
+- `requests.get(...)`, `psycopg2.connect(...)`, `open(path).read()` inside `async def` → the async equivalents (`httpx.AsyncClient`, `asyncpg`, `anyio.Path`).
+- Any sync file / network / DB call in a coroutine blocks the loop.
+
+**Fire-and-forget async tasks**
+
+- `asyncio.create_task(coro)` without holding the reference. The task can be garbage collected mid-flight and disappear silently.
+- Correct: keep the reference in a set, or use `anyio.create_task_group()` (or `asyncio.TaskGroup` in 3.11+) for scoped lifecycle with proper exception propagation.
+
+**Retry without safeguards**
+
+- Retry loop with no max attempts → infinite spin under permanent failure.
+- Retry loop with no backoff → hammers the failing service, gets you rate-limited or banned.
+- Retry loop with no jitter → thundering herd when N clients recover at the same tick.
+- Retrying on non-retryable errors (401, 403, 400) is a bug, not a fix.
+- Use a battle-tested library (`tenacity`, `stamina`, `backoff`) rather than rolling your own.
+
+**Floating-point money**
+
+- `float` for prices, balances, invoice totals, taxes. `0.1 + 0.2 != 0.3`, and it propagates.
+- Use `Decimal` with an explicit context, or integer minor units (cents / paise / pence).
+- `a == b` on floats is generally broken — use `math.isclose(a, b, rel_tol=..., abs_tol=...)`.
+
+**Naïve datetime**
+
+- `datetime.now()` / `datetime.utcnow()` / `new Date()` without timezone. Meaning depends on machine local zone, drifts under DST, breaks across regions.
+- Store UTC (`datetime.now(tz=UTC)`), convert for display only.
+- `datetime.utcnow()` in particular is deprecated in Python 3.12+ because it returns a *naive* datetime with UTC values — footgun.
+
+**String-interpolated SQL / shell**
+
+- `f"SELECT * FROM users WHERE id = {user_id}"` — SQL injection.
+- `subprocess.run(cmd, shell=True)` with user-influenced input — shell injection.
+- `os.system(cmd)` at all when `subprocess.run(argv_list, shell=False, check=True)` works.
+- Parameterize queries. Split shell commands into argv lists. Never pass user input through a shell parser.
+
+**Unsafe deserialization**
+
+- `pickle.loads(untrusted_bytes)` → arbitrary code execution.
+- `yaml.load(untrusted)` → arbitrary code execution. Use `yaml.safe_load`.
+- `eval()`, `exec()` on any external string — same.
+- If pickle / `yaml.load` / `eval` is reachable from outside, redesign.
+
+**Debug flags in production**
+
+- `debug=True` in Flask / Django / FastAPI. Verbose stack traces returned to the client is a data leak.
+- Development-only routes (`/debug/`, `/_test/`) not gated by environment.
+- Fixture / seed loading called at production import time.
+
+**Global mutable state**
+
+- Module-level mutable containers (`_cache = {}`, `_registry = []`) mutated by every request → race conditions under concurrency, unclean state across restarts.
+- Prefer per-request state, or explicit thread-safe / async-safe primitives.
+- Singletons that carry mutable state hide dependencies and defeat testing.
+
+**Logging sensitive data**
+
+- `log.info(f"login attempt: {request_body}")` when the body contains password, token, PII.
+- Redact before logging, or log a stable fingerprint (`sha256(token)[:8]`).
+- Structured logging + a redaction pass at the formatter is stronger than trusting every call site.
+
+**Silent type coercion**
+
+- `if value:` when `value` might legitimately be `0`, `""`, or `[]`. Use `if value is not None:` when that's what you mean.
+- `int(user_input)` without validation → `ValueError` bubbles up as a 500.
+- Implicit boolean context on domain objects (`if user:` where `user` is a `User`) is ambiguous — say what you mean.
+
+**Working-directory / import-time surprises**
+
+- Reading a file at import time (`config = open("config.yaml").read()` at module top level). Import order becomes correctness. CWD becomes correctness.
+- Expensive computation at import time (compiling large regexes, loading models). Slows every process start, breaks tooling that imports for introspection.
+- `sys.exit()` from inside a library — you don't own the process.
+
+**See also:** §Validate at boundaries — most of these are "you didn't validate at the boundary." §Encapsulation — most of the rest are "you exposed mutable state that shouldn't be reachable." §Make Illegal States Unrepresentable — many production bugs are invariants encoded as `assert` rather than as types.
+
+---
+
 ### Verify external-tool config from source
 
 - Never propose config flags, env vars, schema fields, or CLI arguments for an external tool (linter, build system, library, framework) from memory or training. Check the **pinned version's** schema, source, or `--help` output first.
@@ -803,6 +931,7 @@ Authorization for one action does not extend to similar actions. "Yes, push this
 - **Encode invariants in types and constructors, not in comments.** See §Make Illegal States Unrepresentable.
 - **One concern per commit. No AI-attribution footers. No PR-number references.** See §Commits.
 - **No comment unless the *why* is non-obvious.** No history, no task references, no architecture lore in docstrings. See §Comments and docstrings.
+- **Never `assert` for runtime validation.** `python -O` strips it. Raise the specific exception. Also never in production: bare `except:`, hardcoded secrets, blocking I/O in async, retry without jitter+backoff, `float` for money, naïve datetime, string-interpolated SQL/shell, `pickle.loads` on untrusted data, `debug=True`. See §Never in production code.
 - **Verify external-tool knobs against the pinned version.** No knobs from memory. See §Verify external-tool config.
 - **Don't skip the research-prior-art step for design-shaped problems.** Jumping straight to implementation without surveying existing solutions is a regular failure mode that produces reinvented wheels. See §Research prior art before designing.
 - **Stay within scope. Refactors require explicit buy-in.** See §Stay within scope.
